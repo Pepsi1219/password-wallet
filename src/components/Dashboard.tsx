@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Plus, KeyRound, Copy, Trash2, Pencil, FileText, X, Search, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import type { User } from 'firebase/auth';
+import { t } from '../i18n';
+import type { Language } from '../i18n';
 
 export interface WalletItem {
   id: string;
@@ -14,6 +16,7 @@ export interface WalletItem {
 
 interface DashboardProps {
   user: User;
+  language: Language;
   items: WalletItem[];
   loading: boolean;
   onOpenAddModal: () => void;
@@ -24,6 +27,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({
   user,
+  language,
   items,
   loading,
   onOpenAddModal,
@@ -69,11 +73,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="dashboard-scroll">
         <div className="dashboard-heading">
           <div>
-            <p className="dashboard-eyebrow">YOUR PRIVATE COLLECTION</p>
-            <h1>Passwords</h1>
-            <p className="dashboard-subtitle">Everything you need, right where you left it.</p>
+            <p className="dashboard-eyebrow">{t(language, 'privateCollection')}</p>
+            <h1>{t(language, 'passwords')}</h1>
+            <p className="dashboard-subtitle">{t(language, 'dashboardSubtitle')}</p>
           </div>
-          <button onClick={onOpenAddModal} className="add-entry-button" aria-label="Add password" title="Add password">
+          <button onClick={onOpenAddModal} className="add-entry-button" aria-label={t(language, 'addPassword')} title={t(language, 'addPassword')}>
             <Plus />
           </button>
         </div>
@@ -81,10 +85,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="vault-summary">
           <div className="vault-summary-icon"><ShieldCheck /></div>
           <div className="vault-summary-copy">
-            <strong>{items.length} {items.length === 1 ? 'account' : 'accounts'} saved</strong>
-            <span>Secured for {user.displayName || 'your account'} with your Master PIN</span>
+            <strong>{items.length === 1 ? t(language, 'accountSaved', { count: items.length }) : t(language, 'accountsSaved', { count: items.length })}</strong>
+            <span>{t(language, 'securedFor', { name: user.displayName || (language === 'th' ? 'บัญชีของคุณ' : 'your account') })}</span>
           </div>
-          <span className="vault-summary-status">SECURE</span>
+          <span className="vault-summary-status">{t(language, 'secure')}</span>
         </div>
 
         <label className="wallet-search">
@@ -93,34 +97,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
             type="search"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Search accounts"
-            aria-label="Search accounts"
+            placeholder={t(language, 'searchAccounts')}
+            aria-label={t(language, 'searchAccounts')}
           />
           {searchQuery && (
-            <button type="button" className="search-clear" onClick={() => setSearchQuery('')} aria-label="Clear search">
+            <button type="button" className="search-clear" onClick={() => setSearchQuery('')} aria-label={t(language, 'clearSearch')}>
               <X />
             </button>
           )}
         </label>
 
         <div className="list-heading">
-          <h2>All accounts</h2>
+          <h2>{t(language, 'allAccounts')}</h2>
           <span>{filteredItems.length}</span>
         </div>
 
         {loading ? (
           <div className="wallet-empty-state">
             <span className="empty-mark"><KeyRound /></span>
-            <p>Loading your accounts...</p>
+            <p>{t(language, 'loadingAccounts')}</p>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="wallet-empty-state">
             <span className="empty-mark"><KeyRound /></span>
-            <h3>{items.length === 0 ? 'Your wallet is ready' : 'No matches found'}</h3>
-            <p>{items.length === 0 ? 'Add your first account to keep it close.' : 'Try a different name or email.'}</p>
+            <h3>{items.length === 0 ? t(language, 'walletReady') : t(language, 'noMatches')}</h3>
+            <p>{items.length === 0 ? t(language, 'firstAccountHint') : t(language, 'searchHint')}</p>
             {items.length === 0 && (
               <button onClick={onOpenAddModal} className="text-action-button">
-                <Plus /> Add an account
+                <Plus /> {t(language, 'addAccount')}
               </button>
             )}
           </div>
@@ -140,10 +144,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         <p>{item.username}</p>
                       </div>
                       <div className="credential-actions">
-                        <button onClick={() => onOpenEditModal(item)} className="row-icon-button" aria-label={`Edit ${item.title}`} title="Edit">
+                        <button onClick={() => onOpenEditModal(item)} className="row-icon-button" aria-label={t(language, 'editNamedAccount', { name: item.title })} title={t(language, 'editAccount')}>
                           <Pencil />
                         </button>
-                        <button onClick={() => onDelete(item.id)} className="row-icon-button delete-action" aria-label={`Delete ${item.title}`} title="Delete">
+                        <button onClick={() => onDelete(item.id)} className="row-icon-button delete-action" aria-label={t(language, 'deleteAccount', { name: item.title })} title={t(language, 'deleteAccount', { name: item.title })}>
                           <Trash2 />
                         </button>
                       </div>
@@ -153,25 +157,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         {isRevealed ? decryptedPasswords[item.id] : '••••••••••••'}
                       </span>
                       <div className="secret-actions">
-                        <button onClick={(event) => handleToggleDecrypt(item, event)} className="text-icon-button" aria-label={isRevealed ? 'Hide password' : 'Reveal password'}>
+                        <button onClick={(event) => handleToggleDecrypt(item, event)} className="text-icon-button" aria-label={t(language, isRevealed ? 'hidePassword' : 'revealPassword')}>
                           {isRevealed ? <EyeOff /> : <Eye />}
-                          <span>{isRevealed ? 'Hide' : 'Reveal'}</span>
+                          <span>{t(language, isRevealed ? 'hidePassword' : 'revealPassword')}</span>
                         </button>
                         {isRevealed && (
                           <button
                             onClick={() => {
                               navigator.clipboard.writeText(decryptedPasswords[item.id]);
-                              alert('คัดลอกรหัสผ่านแล้ว!');
+                              alert(t(language, 'copiedPassword'));
                             }}
                             className="row-icon-button copy-action"
-                            aria-label="Copy password"
-                            title="Copy password"
+                            aria-label={t(language, 'copyPassword')}
+                            title={t(language, 'copyPassword')}
                           >
                             <Copy />
                           </button>
                         )}
                         {item.note && (
-                          <button onClick={() => setActiveNote(item.note || '')} className="note-indicator" aria-label="Open secure note" title="Secure note">
+                          <button onClick={() => setActiveNote(item.note || '')} className="note-indicator" aria-label={t(language, 'openNote')} title={t(language, 'secureNote')}>
                             <FileText />
                           </button>
                         )}
@@ -187,12 +191,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {activeNote && (
         <div className="note-overlay" onClick={() => setActiveNote(null)}>
-          <section className="note-sheet" role="dialog" aria-modal="true" aria-label="Secure note" onClick={(event) => event.stopPropagation()}>
+          <section className="note-sheet" role="dialog" aria-modal="true" aria-label={t(language, 'secureNote')} onClick={(event) => event.stopPropagation()}>
             <div className="sheet-grabber" />
             <div className="note-sheet-heading">
               <span className="note-sheet-icon"><FileText /></span>
-              <div><p>PRIVATE NOTE</p><h2>Secure note</h2></div>
-              <button onClick={() => setActiveNote(null)} className="row-icon-button" aria-label="Close note"><X /></button>
+              <div><p>{t(language, 'privateNote')}</p><h2>{t(language, 'secureNote')}</h2></div>
+              <button onClick={() => setActiveNote(null)} className="row-icon-button" aria-label={t(language, 'closeNote')}><X /></button>
             </div>
             <p className="note-sheet-content">{activeNote}</p>
           </section>

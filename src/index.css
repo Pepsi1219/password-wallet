@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-	font-family: "DM Sans", "Avenir Next", sans-serif;
+	font-family: "DM Sans", "Noto Sans Thai", "Avenir Next", sans-serif;
 	color: #17241e;
 	background: #edf2ed;
 	font-synthesis: none;

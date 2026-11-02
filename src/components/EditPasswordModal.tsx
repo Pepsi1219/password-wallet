@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { Pencil, X } from 'lucide-react';
 import type { WalletItem } from './Dashboard';
+import { t } from '../i18n';
+import type { Language } from '../i18n';
 
 interface EditPasswordModalProps {
   item: WalletItem;
+  language: Language;
   onClose: () => void;
   onUpdate: (id: string, title: string, username: string, newPassword: string | null, note: string) => void;
 }
 
-export const EditPasswordModal: React.FC<EditPasswordModalProps> = ({ item, onClose, onUpdate }) => {
+export const EditPasswordModal: React.FC<EditPasswordModalProps> = ({ item, language, onClose, onUpdate }) => {
   const [title, setTitle] = useState(item.title);
   const [username, setUsername] = useState(item.username);
   const [password, setPassword] = useState(''); // ถ้าเว้นว่างไว้ จะแปลว่าไม่เปลี่ยนรหัสผ่านเดิม
@@ -17,7 +20,7 @@ export const EditPasswordModal: React.FC<EditPasswordModalProps> = ({ item, onCl
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !username) {
-      alert('กรุณากรอกข้อมูลสำคัญให้ครบถ้วน');
+      alert(t(language, 'accountNameRequired'));
       return;
     }
     onUpdate(item.id, title, username, password ? password : null, note);
@@ -30,39 +33,39 @@ export const EditPasswordModal: React.FC<EditPasswordModalProps> = ({ item, onCl
         <header className="modal-heading">
           <span className="modal-heading-icon"><Pencil /></span>
           <div>
-            <p>ACCOUNT DETAILS</p>
-            <h2 id="edit-password-title">Edit account</h2>
+            <p>{t(language, 'accountDetails')}</p>
+            <h2 id="edit-password-title">{t(language, 'editAccount')}</h2>
           </div>
-          <button type="button" className="row-icon-button modal-close" onClick={onClose} aria-label="Close">
+          <button type="button" className="row-icon-button modal-close" onClick={onClose} aria-label={t(language, 'cancel')}>
             <X />
           </button>
         </header>
-        <p className="modal-description">Changes are saved to your private wallet.</p>
+        <p className="modal-description">{t(language, 'editDescription')}</p>
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-field">
-            <label htmlFor="edit-account-title">Account name</label>
+            <label htmlFor="edit-account-title">{t(language, 'accountName')}</label>
             <input id="edit-account-title" type="text" value={title} onChange={(event) => setTitle(event.target.value)} className="form-control" />
           </div>
 
           <div className="form-field">
-            <label htmlFor="edit-account-username">Username or email</label>
+            <label htmlFor="edit-account-username">{t(language, 'usernameOrEmail')}</label>
             <input id="edit-account-username" type="text" value={username} onChange={(event) => setUsername(event.target.value)} className="form-control" autoComplete="username" />
           </div>
 
           <div className="form-field">
-            <label htmlFor="edit-account-password">New password <span>Leave blank to keep current</span></label>
-            <input id="edit-account-password" type="password" placeholder="Enter a new password" value={password} onChange={(event) => setPassword(event.target.value)} className="form-control" autoComplete="new-password" />
+            <label htmlFor="edit-account-password">{t(language, 'newPassword')} <span>{t(language, 'leaveBlankToKeep')}</span></label>
+            <input id="edit-account-password" type="password" placeholder={t(language, 'newPasswordPlaceholder')} value={password} onChange={(event) => setPassword(event.target.value)} className="form-control" autoComplete="new-password" />
           </div>
 
           <div className="form-field">
-            <label htmlFor="edit-account-note">Note <span>Optional</span></label>
+            <label htmlFor="edit-account-note">{t(language, 'noteLabel')} <span>{t(language, 'optional')}</span></label>
             <input id="edit-account-note" type="text" value={note} onChange={(event) => setNote(event.target.value)} className="form-control" />
           </div>
 
           <div className="modal-actions">
-            <button type="button" onClick={onClose} className="button-secondary">Cancel</button>
-            <button type="submit" className="button-primary">Save changes</button>
+            <button type="button" onClick={onClose} className="button-secondary">{t(language, 'cancel')}</button>
+            <button type="submit" className="button-primary">{t(language, 'saveChanges')}</button>
           </div>
         </form>
       </section>

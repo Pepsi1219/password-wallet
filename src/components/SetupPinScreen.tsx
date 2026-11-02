@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Delete, KeyRound, ShieldAlert } from 'lucide-react';
 import type { User } from 'firebase/auth';
+import { t } from '../i18n';
+import type { Language } from '../i18n';
 
 interface SetupPinScreenProps {
   user: User;
+  language: Language;
   onPinCreated: (pin: string) => Promise<boolean>;
 }
 
-export const SetupPinScreen: React.FC<SetupPinScreenProps> = ({ user, onPinCreated }) => {
+export const SetupPinScreen: React.FC<SetupPinScreenProps> = ({ user, language, onPinCreated }) => {
   const [step, setStep] = useState<'create' | 'confirm'>('create');
   const [pin, setPin] = useState('');
   const [tempPin, setTempPin] = useState('');
@@ -35,7 +38,7 @@ export const SetupPinScreen: React.FC<SetupPinScreenProps> = ({ user, onPinCreat
       setPin('');
       setTempPin('');
       setStep('create');
-      setPinError('PIN ไม่ตรงกัน กรุณาตั้งค่าใหม่อีกครั้ง');
+      setPinError(t(language, 'pinMismatch'));
       return;
     }
 
@@ -44,7 +47,7 @@ export const SetupPinScreen: React.FC<SetupPinScreenProps> = ({ user, onPinCreat
     setIsSaving(false);
     if (!saved) {
       setPin('');
-      setPinError('บันทึก PIN ไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง');
+      setPinError(t(language, 'pinSaveFailed'));
     }
   };
 
@@ -58,26 +61,24 @@ export const SetupPinScreen: React.FC<SetupPinScreenProps> = ({ user, onPinCreat
     <div className="pin-screen">
       <section className="pin-heading">
         <div className="pin-icon"><KeyRound /></div>
-        <p className="pin-step">STEP {step === 'create' ? '01' : '02'} / 02</p>
-        <h1>{step === 'create' ? 'Create your PIN' : 'Confirm your PIN'}</h1>
+        <p className="pin-step">{t(language, step === 'create' ? 'stepOne' : 'stepTwo')}</p>
+        <h1>{t(language, step === 'create' ? 'createPinTitle' : 'confirmPinTitle')}</h1>
         <p className="pin-account">{user.displayName || user.email}</p>
         <p className="pin-description">
-          {step === 'create'
-            ? `ตั้ง PIN 6 หลักเพื่อปกป้อง Password Wallet ของคุณ`
-            : 'กรอก PIN ชุดเดิมอีกครั้งเพื่อยืนยัน'}
+          {t(language, step === 'create' ? 'createPinDescription' : 'confirmPinDescription')}
         </p>
 
         {step === 'create' && (
           <div className="pin-warning">
             <ShieldAlert />
-            <span>จำ PIN นี้ไว้ให้ดี หากลืมจะไม่สามารถกู้คืนได้</span>
+            <span>{t(language, 'pinWarning')}</span>
           </div>
         )}
       </section>
 
       {pinError && <p role="alert" className="pin-error">{pinError}</p>}
 
-      <div className="pin-indicators" aria-label={`${pin.length} of ${PIN_LENGTH} digits entered`}>
+      <div className="pin-indicators" aria-label={t(language, 'digitsEntered', { count: pin.length })}>
         {Array.from({ length: PIN_LENGTH }).map((_, index) => (
           <span
             key={index}
@@ -117,10 +118,10 @@ export const SetupPinScreen: React.FC<SetupPinScreenProps> = ({ user, onPinCreat
           type="button"
           onClick={handleDelete}
           disabled={isSaving}
-          aria-label="Delete last digit"
+          aria-label={t(language, 'deleteLastDigit')}
           className="pin-key pin-key-delete"
         >
-          {isSaving ? <span className="pin-saving">Saving</span> : <Delete />}
+          {isSaving ? <span className="pin-saving">{t(language, 'saving')}</span> : <Delete />}
         </button>
       </div>
     </div>

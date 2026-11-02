@@ -1,26 +1,29 @@
 import React from 'react';
 import { LockKeyhole, ShieldCheck } from 'lucide-react';
+import { t } from '../i18n';
+import type { Language } from '../i18n';
 
 interface LoginScreenProps {
+  language: Language;
   onGoogleLogin: () => void;
 }
 
-export const LoginScreen: React.FC<LoginScreenProps> = ({ onGoogleLogin }) => {
+export const LoginScreen: React.FC<LoginScreenProps> = ({ language, onGoogleLogin }) => {
   return (
     <div className="auth-screen">
       <section className="auth-panel">
         <div className="auth-brandmark"><ShieldCheck /></div>
-        <p className="auth-eyebrow">A quieter place for your passwords</p>
-        <h1>All your keys.<br />One calm place.</h1>
+        <p className="auth-eyebrow">{t(language, 'loginEyebrow')}</p>
+        <h1>{t(language, 'loginHeadline')}</h1>
         <p className="auth-description">
-          Sign in to open your personal wallet. Your saved accounts stay organized and ready when you need them.
+          {t(language, 'loginDescription')}
         </p>
 
         <div className="auth-security-note">
           <span className="auth-security-icon"><LockKeyhole /></span>
           <span>
-            <strong>Protected with your Master PIN</strong>
-            <small>Google verifies your account. Your PIN unlocks the wallet.</small>
+            <strong>{t(language, 'loginSecurityTitle')}</strong>
+            <small>{t(language, 'loginSecurityBody')}</small>
           </span>
         </div>
 
@@ -31,9 +34,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onGoogleLogin }) => {
             <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.19C.43 8.12 0 9.87 0 12s.43 3.88 1.19 5.42l4.09-3.15z" />
             <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.24 0 3.17 2.64 1.19 6.58l4.09 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
           </svg>
-          <span>Continue with Google</span>
+          <span>{t(language, 'continueWithGoogle')}</span>
         </button>
-        <p className="auth-footnote">Only your Google account email is used to identify your wallet.</p>
+        <p className="auth-footnote">{t(language, 'loginFootnote')}</p>
       </section>
     </div>
   );

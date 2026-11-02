@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Delete, KeyRound } from 'lucide-react';
 import type { User } from 'firebase/auth';
+import { t } from '../i18n';
+import type { Language } from '../i18n';
 
 interface UnlockScreenProps {
   user: User;
+  language: Language;
   onUnlock: (password: string) => Promise<boolean>;
 }
 
-export const UnlockScreen: React.FC<UnlockScreenProps> = ({ user, onUnlock }) => {
+export const UnlockScreen: React.FC<UnlockScreenProps> = ({ user, language, onUnlock }) => {
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState('');
   const [isChecking, setIsChecking] = useState(false);
@@ -27,7 +30,7 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({ user, onUnlock }) =>
       setIsChecking(false);
       if (!unlocked) {
         setPin('');
-        setPinError('PIN ไม่ถูกต้อง หรือไม่สามารถตรวจสอบกับบัญชีนี้ได้');
+        setPinError(t(language, 'pinIncorrect'));
       }
     }
   };
@@ -43,13 +46,13 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({ user, onUnlock }) =>
     <div className="pin-screen">
       <section className="pin-heading">
         <div className="pin-icon"><KeyRound /></div>
-        <p className="pin-step">YOUR PRIVATE VAULT</p>
-        <h1>Welcome back</h1>
+        <p className="pin-step">{t(language, 'privateVault')}</p>
+        <h1>{t(language, 'welcomeBack')}</h1>
         <p className="pin-account">{user.displayName || user.email}</p>
-        <p className="pin-description">กรอก Master PIN 6 หลักเพื่อปลดล็อก wallet</p>
+        <p className="pin-description">{t(language, 'unlockPrompt')}</p>
       </section>
 
-      <div className="pin-indicators" aria-label={`${pin.length} of ${PIN_LENGTH} digits entered`}>
+      <div className="pin-indicators" aria-label={t(language, 'digitsEntered', { count: pin.length })}>
         {Array.from({ length: PIN_LENGTH }).map((_, index) => (
           <span
             key={index}
@@ -90,7 +93,7 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({ user, onUnlock }) =>
           type="button"
           onClick={handleDelete}
           disabled={isChecking}
-          aria-label="Delete last digit"
+          aria-label={t(language, 'deleteLastDigit')}
           className="pin-key pin-key-delete"
         >
           <Delete />

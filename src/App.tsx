@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShieldCheck, Unlock, LogOut } from 'lucide-react';
+import { ShieldCheck, Unlock, LogOut, Moon, Sun, Languages } from 'lucide-react';
 import { encryptData, decryptData } from './services/crypto';
 import { db, auth, googleProvider } from './services/firebase';
 import { collection, addDoc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, where, limit } from 'firebase/firestore';
@@ -14,8 +14,24 @@ import { Dashboard } from './components/Dashboard';
 import type { WalletItem } from './components/Dashboard';
 import { AddPasswordModal } from './components/AddPasswordModal';
 import { EditPasswordModal } from './components/EditPasswordModal';
+import { t } from './i18n';
+import type { Language } from './i18n';
+
+type Theme = 'light' | 'dark';
+
+function readPreference<T extends string>(key: string, values: readonly T[], fallback: T): T {
+  try {
+    const storedValue = localStorage.getItem(key);
+    if (storedValue && values.includes(storedValue as T)) return storedValue as T;
+  } catch {
+    // Keep the app usable when browser storage is unavailable.
+  }
+  return fallback;
+}
 
 export default function App() {
+  const [language, setLanguage] = useState<Language>(() => readPreference('wallet-language', ['en', 'th'], 'en'));
+  const [theme, setTheme] = useState<Theme>(() => readPreference('wallet-theme', ['light', 'dark'], 'light'));
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -26,6 +42,17 @@ export default function App() {
   const [walletItems, setWalletItems] = useState<WalletItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#111914' : '#155c45');
+    try {
+      localStorage.setItem('wallet-language', language);
+      localStorage.setItem('wallet-theme', theme);
+    } catch {
+      // Preferences remain active for this session if storage is unavailable.
+    }
+  }, [language, theme]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -59,7 +86,7 @@ export default function App() {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
       console.error('Google Sign-In Error:', error);
-      alert('ไม่สามารถเข้าสู่ระบบด้วย Google ได้');
+      alert(t(language, 'signInFailed'));
     }
   };
 
@@ -193,7 +220,7 @@ export default function App() {
       fetchWallet(user.uid);
     } catch (error) {
       console.error('Error adding password:', error);
-      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+      alert(t(language, 'savePasswordFailed'));
     }
   };
 
@@ -209,7 +236,7 @@ export default function App() {
       );
       return decrypted;
     } catch (error) {
-      alert('Master PIN ไม่ถูกต้อง ไม่สามารถถอดรหัสได้');
+      alert(t(language, 'decryptFailed'));
       return null;
     }
   };
@@ -239,12 +266,12 @@ export default function App() {
     fetchWallet(user.uid);
   } catch (error) {
     console.error('Error updating password:', error);
-    alert('เกิดข้อผิดพลาดในการอัปเดตข้อมูล');
+    alert(t(language, 'updateFailed'));
   }
 };
 
   const handleDelete = async (id: string) => {
-    if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?') && user) {
+    if (confirm(t(language, 'deleteConfirm')) && user) {
       try {
         await deleteDoc(doc(db, 'vault_items', id));
         fetchWallet(user.uid);
@@ -258,56 +285,82 @@ export default function App() {
 
   if (authLoading || (user && hasPinConfigured === null)) {
     return (
-      <div className="app-backdrop">
+      <div className="app-backdrop" data-theme={theme}>
         <div className="loading-state">
           <span className="brand-emblem"><ShieldCheck /></span>
-          <p>Opening your wallet...</p>
+          <p>{t(language, 'openingWallet')}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="app-backdrop">
+    <div className="app-backdrop" data-theme={theme}>
       <div className="app-shell">
         <header className="app-header">
           <div className="brand-lockup">
             <span className="brand-emblem"><ShieldCheck /></span>
             <span className="brand-copy">
               <strong>Wallet</strong>
-              <small>PERSONAL VAULT</small>
+              <small>{t(language, 'personalVault')}</small>
             </span>
           </div>
 
-          {user && (
+          <div className="header-tools">
+            <div className="preference-controls">
+              <button
+                type="button"
+                className="preference-button theme-button"
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                aria-label={t(language, theme === 'light' ? 'switchToDark' : 'switchToLight')}
+                title={t(language, theme === 'light' ? 'switchToDark' : 'switchToLight')}
+              >
+                {theme === 'light' ? <Moon /> : <Sun />}
+                <span>{t(language, theme === 'light' ? 'darkMode' : 'lightMode')}</span>
+              </button>
+              <button
+                type="button"
+                className="preference-button language-button"
+                onClick={() => setLanguage(language === 'en' ? 'th' : 'en')}
+                aria-label={t(language, 'changeLanguage')}
+                title={t(language, 'changeLanguage')}
+              >
+                <Languages />
+                <span>{language === 'en' ? 'ไทย' : 'EN'}</span>
+              </button>
+            </div>
+
+            {user && (
             <div className="session-controls">
               {isUnlocked && (
                 <span className="session-badge">
-                  <Unlock /> <span>Unlocked</span>
+                  <Unlock /> <span>{t(language, 'unlocked')}</span>
                 </span>
               )}
               <button
                 onClick={handleLogout}
-                aria-label="Sign out"
-                title="Sign out"
+                aria-label={t(language, 'signOut')}
+                title={t(language, 'signOut')}
                 className="icon-button signout-button"
               >
                 <LogOut />
               </button>
             </div>
           )}
+          </div>
         </header>
 
         <main className="app-content">
           {!user ? (
-            <LoginScreen onGoogleLogin={handleGoogleLogin} />
+            <LoginScreen language={language} onGoogleLogin={handleGoogleLogin} />
           ) : !hasPinConfigured ? (
-            <SetupPinScreen user={user} onPinCreated={handlePinCreated} />
+            <SetupPinScreen user={user} language={language} onPinCreated={handlePinCreated} />
           ) : !isUnlocked ? (
-            <UnlockScreen user={user} onUnlock={handleUnlock} />
+            <UnlockScreen user={user} language={language} onUnlock={handleUnlock} />
           ) : (
             <Dashboard
               user={user}
+              language={language}
               items={walletItems}
               loading={loading}
               onOpenAddModal={() => setShowAddModal(true)}
@@ -320,6 +373,7 @@ export default function App() {
           {showAddModal && user && (
             <AddPasswordModal
               userId={user.uid}
+              language={language}
               onClose={() => setShowAddModal(false)}
               onAdd={handleAddPassword}
             />
@@ -328,6 +382,7 @@ export default function App() {
           {editingItem && (
             <EditPasswordModal
               item={editingItem}
+              language={language}
               onClose={() => setEditingItem(null)}
               onUpdate={handleUpdatePassword}
             />

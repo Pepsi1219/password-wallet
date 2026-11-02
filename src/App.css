@@ -678,7 +678,7 @@
   width: min(100%, 324px);
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 11px;
-  margin-bottom: 20px;
+  margin-bottom: 180px;
 }
 
 .pin-key {
@@ -749,7 +749,7 @@
 
   .pin-keypad {
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 40px;
   }
 }
 
@@ -1308,5 +1308,373 @@
   .credential-row {
     gap: 10px;
     padding: 11px;
+  }
+}
+
+.header-tools,
+.preference-controls {
+  display: flex;
+  align-items: center;
+}
+
+.header-tools {
+  gap: 9px;
+}
+
+.preference-controls {
+  gap: 5px;
+}
+
+.preference-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #fff;
+  color: #4b5c50;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  transition: 150ms ease;
+}
+
+.preference-button:hover {
+  border-color: #cbd9ce;
+  background: #f3f7f2;
+  color: var(--forest);
+}
+
+.preference-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.preference-button:focus-visible {
+  outline: 3px solid rgba(21, 92, 69, 0.22);
+  outline-offset: 2px;
+}
+
+.auth-panel h1 {
+  white-space: pre-line;
+}
+
+.app-backdrop[data-theme="dark"] {
+  --ink: #edf2ed;
+  --muted: #a1aea4;
+  --line: #303d34;
+  --paper: #161d18;
+  --mint: #263a2d;
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+  background-color: #0e1410;
+  background-image: radial-gradient(rgba(138, 200, 165, 0.08) 0.7px, transparent 0.7px);
+  color-scheme: dark;
+}
+
+.app-backdrop[data-theme="dark"] .app-shell {
+  border-color: #2b382f;
+}
+
+.app-backdrop[data-theme="dark"] .app-header {
+  border-color: var(--line);
+  background: rgba(22, 29, 24, 0.95);
+}
+
+.app-backdrop[data-theme="dark"] .brand-copy small,
+.app-backdrop[data-theme="dark"] .dashboard-eyebrow,
+.app-backdrop[data-theme="dark"] .pin-step {
+  color: #9baa9d;
+}
+
+.app-backdrop[data-theme="dark"] .session-badge {
+  border-color: #31503a;
+  background: #203328;
+  color: #b6dfc0;
+}
+
+.app-backdrop[data-theme="dark"] .icon-button,
+.app-backdrop[data-theme="dark"] .preference-button {
+  border-color: #354239;
+  background: #202a23;
+  color: #c1cdc3;
+}
+
+.app-backdrop[data-theme="dark"] .icon-button:hover,
+.app-backdrop[data-theme="dark"] .preference-button:hover {
+  border-color: #54705c;
+  background: #29372d;
+  color: #b6dfc0;
+}
+
+.app-backdrop[data-theme="dark"] .auth-brandmark,
+.app-backdrop[data-theme="dark"] .pin-icon,
+.app-backdrop[data-theme="dark"] .modal-heading-icon {
+  color: #a8d7b6;
+}
+
+.app-backdrop[data-theme="dark"] .auth-eyebrow {
+  color: #a8d7b6;
+}
+
+.app-backdrop[data-theme="dark"] .auth-security-note {
+  border-color: #303f34;
+  background: #1d2821;
+}
+
+.app-backdrop[data-theme="dark"] .auth-security-icon {
+  background: #263a2d;
+  color: #a8d7b6;
+}
+
+.app-backdrop[data-theme="dark"] .auth-security-note strong {
+  color: #e3ebe3;
+}
+
+.app-backdrop[data-theme="dark"] .auth-footnote {
+  color: #96a198;
+}
+
+.app-backdrop[data-theme="dark"] .pin-account {
+  color: #b2beb4;
+}
+
+.app-backdrop[data-theme="dark"] .pin-warning {
+  border-color: #51452b;
+  background: #30291d;
+  color: #e2c994;
+}
+
+.app-backdrop[data-theme="dark"] .pin-indicator {
+  border-color: #3a493e;
+  background: #222d25;
+}
+
+.app-backdrop[data-theme="dark"] .pin-indicator.is-filled {
+  border-color: #8bc69e;
+  background: #8bc69e;
+}
+
+.app-backdrop[data-theme="dark"] .pin-key {
+  border-color: #303d34;
+  background: #222c25;
+  color: #edf2ed;
+  box-shadow: none;
+}
+
+.app-backdrop[data-theme="dark"] .pin-key:hover:not(:disabled) {
+  border-color: #526b58;
+  background: #2b392f;
+}
+
+.app-backdrop[data-theme="dark"] .pin-key:active:not(:disabled) {
+  background: #35473a;
+}
+
+.app-backdrop[data-theme="dark"] .pin-key-delete {
+  background: #382723;
+  color: #efad99;
+}
+
+.app-backdrop[data-theme="dark"] .vault-summary {
+  background: #174b39;
+}
+
+.app-backdrop[data-theme="dark"] .wallet-search {
+  border-color: #334138;
+  background: #1d2720;
+  color: #a5b1a7;
+}
+
+.app-backdrop[data-theme="dark"] .wallet-search input {
+  color: var(--ink);
+}
+
+.app-backdrop[data-theme="dark"] .wallet-search input::placeholder {
+  color: #8b998e;
+}
+
+.app-backdrop[data-theme="dark"] .search-clear {
+  color: #b3c0b5;
+}
+
+.app-backdrop[data-theme="dark"] .list-heading h2 {
+  color: #dce5dc;
+}
+
+.app-backdrop[data-theme="dark"] .list-heading span {
+  background: #26372b;
+  color: #b2d8bc;
+}
+
+.app-backdrop[data-theme="dark"] .credential-row {
+  border-color: #2d3931;
+  background: #1b241e;
+}
+
+.app-backdrop[data-theme="dark"] .credential-row:hover {
+  border-color: #435849;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.16);
+}
+
+.app-backdrop[data-theme="dark"] .credential-identity h3 {
+  color: #edf2ed;
+}
+
+.app-backdrop[data-theme="dark"] .credential-identity p {
+  color: #a2afa5;
+}
+
+.app-backdrop[data-theme="dark"] .row-icon-button,
+.app-backdrop[data-theme="dark"] .note-indicator {
+  color: #aab6ac;
+}
+
+.app-backdrop[data-theme="dark"] .row-icon-button:hover,
+.app-backdrop[data-theme="dark"] .note-indicator:hover {
+  background: #2a382e;
+  color: #b8dfc1;
+}
+
+.app-backdrop[data-theme="dark"] .row-icon-button.delete-action:hover {
+  background: #3b2924;
+  color: #f0ad98;
+}
+
+.app-backdrop[data-theme="dark"] .credential-bottomline {
+  border-color: #303c33;
+}
+
+.app-backdrop[data-theme="dark"] .credential-secret {
+  color: #a2aea4;
+}
+
+.app-backdrop[data-theme="dark"] .credential-secret.revealed {
+  color: #c4dfca;
+}
+
+.app-backdrop[data-theme="dark"] .text-icon-button {
+  background: #28372c;
+  color: #c3dec9;
+}
+
+.app-backdrop[data-theme="dark"] .text-icon-button:hover {
+  background: #334638;
+}
+
+.app-backdrop[data-theme="dark"] .copy-action {
+  background: #254331;
+  color: #b5ddc0;
+}
+
+.app-backdrop[data-theme="dark"] .note-indicator {
+  background: #39331f;
+  color: #e1ca82;
+}
+
+.app-backdrop[data-theme="dark"] .empty-mark {
+  background: #26372b;
+  color: #afd6b9;
+}
+
+.app-backdrop[data-theme="dark"] .wallet-empty-state h3 {
+  color: #e9efe9;
+}
+
+.app-backdrop[data-theme="dark"] .note-sheet,
+.app-backdrop[data-theme="dark"] .modal-sheet {
+  border-color: #354239;
+  background: #1a231d;
+}
+
+.app-backdrop[data-theme="dark"] .sheet-grabber {
+  background: #546158;
+}
+
+.app-backdrop[data-theme="dark"] .note-sheet-icon {
+  background: #39331f;
+  color: #e1ca82;
+}
+
+.app-backdrop[data-theme="dark"] .note-sheet-heading p {
+  color: #c6b477;
+}
+
+.app-backdrop[data-theme="dark"] .note-sheet-content {
+  color: #d0dad1;
+}
+
+.app-backdrop[data-theme="dark"] .modal-heading p {
+  color: #9baa9d;
+}
+
+.app-backdrop[data-theme="dark"] .modal-description,
+.app-backdrop[data-theme="dark"] .form-field label span {
+  color: #a1aea4;
+}
+
+.app-backdrop[data-theme="dark"] .form-field label {
+  color: #d1dcd2;
+}
+
+.app-backdrop[data-theme="dark"] .form-control {
+  border-color: #39473d;
+  background: #202a23;
+  color: #edf2ed;
+}
+
+.app-backdrop[data-theme="dark"] .form-control::placeholder {
+  color: #8c9a8f;
+}
+
+.app-backdrop[data-theme="dark"] .button-secondary {
+  border-color: #39473d;
+  background: #222d25;
+  color: #d3ded4;
+}
+
+.app-backdrop[data-theme="dark"] .button-secondary:hover {
+  background: #2d3a30;
+}
+
+.app-backdrop[data-theme="dark"] .app-shell {
+  color-scheme: dark;
+}
+
+@media (max-width: 440px) {
+  .header-tools {
+    gap: 5px;
+  }
+
+  .preference-controls {
+    gap: 4px;
+  }
+
+  .preference-button {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0 8px;
+  }
+
+  .theme-button span,
+  .session-badge {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .app-header {
+    padding-right: 11px;
+    padding-left: 11px;
+  }
+
+  .brand-lockup {
+    gap: 7px;
+  }
+
+  .brand-copy small {
+    display: none;
   }
 }
