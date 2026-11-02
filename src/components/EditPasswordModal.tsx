@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Pencil, X } from 'lucide-react';
 import type { WalletItem } from './Dashboard';
 
 interface EditPasswordModalProps {
@@ -23,68 +24,48 @@ export const EditPasswordModal: React.FC<EditPasswordModalProps> = ({ item, onCl
   };
 
   return (
-    <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6 z-50">
-      <div className="w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
-        <h3 className="text-lg font-bold mb-4">Edit Password</h3>
-        <form onSubmit={handleSubmit} className="space-y-3">
+    <div className="modal-backdrop" onClick={onClose}>
+      <section className="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="edit-password-title" onClick={(event) => event.stopPropagation()}>
+        <div className="sheet-grabber" />
+        <header className="modal-heading">
+          <span className="modal-heading-icon"><Pencil /></span>
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">Account / Website Name</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
-            />
+            <p>ACCOUNT DETAILS</p>
+            <h2 id="edit-password-title">Edit account</h2>
+          </div>
+          <button type="button" className="row-icon-button modal-close" onClick={onClose} aria-label="Close">
+            <X />
+          </button>
+        </header>
+        <p className="modal-description">Changes are saved to your private wallet.</p>
+
+        <form onSubmit={handleSubmit} className="modal-form">
+          <div className="form-field">
+            <label htmlFor="edit-account-title">Account name</label>
+            <input id="edit-account-title" type="text" value={title} onChange={(event) => setTitle(event.target.value)} className="form-control" />
           </div>
 
-          <div>
-            <label className="text-xs text-slate-400 mb-1 block">Username / Email</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
-            />
+          <div className="form-field">
+            <label htmlFor="edit-account-username">Username or email</label>
+            <input id="edit-account-username" type="text" value={username} onChange={(event) => setUsername(event.target.value)} className="form-control" autoComplete="username" />
           </div>
 
-          <div>
-            <label className="text-xs text-slate-400 mb-1 block">New Password (ปล่อยว่างถ้าไม่เปลี่ยน)</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
-            />
+          <div className="form-field">
+            <label htmlFor="edit-account-password">New password <span>Leave blank to keep current</span></label>
+            <input id="edit-account-password" type="password" placeholder="Enter a new password" value={password} onChange={(event) => setPassword(event.target.value)} className="form-control" autoComplete="new-password" />
           </div>
 
-          <div>
-            <label className="text-xs text-slate-400 mb-1 block">Note (หมายเหตุเพิ่มเติม)</label>
-            <input
-              type="text"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
-            />
+          <div className="form-field">
+            <label htmlFor="edit-account-note">Note <span>Optional</span></label>
+            <input id="edit-account-note" type="text" value={note} onChange={(event) => setNote(event.target.value)} className="form-control" />
           </div>
 
-          <div className="flex gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-xl transition cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-xs font-medium rounded-xl transition cursor-pointer"
-            >
-              Update
-            </button>
+          <div className="modal-actions">
+            <button type="button" onClick={onClose} className="button-secondary">Cancel</button>
+            <button type="submit" className="button-primary">Save changes</button>
           </div>
         </form>
-      </div>
+      </section>
     </div>
   );
 };

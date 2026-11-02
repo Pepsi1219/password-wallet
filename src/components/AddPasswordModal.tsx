@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../services/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { KeyRound, X } from 'lucide-react';
 
 interface AddPasswordModalProps {
   userId: string; // รับ userId มาเพื่อดึงรายการที่เคยบันทึกไว้ของผู้ใช้คนนี้
@@ -54,84 +55,61 @@ export const AddPasswordModal: React.FC<AddPasswordModalProps> = ({ userId, onCl
   };
 
   return (
-    <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6 z-50">
-      <div className="w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
-        <h3 className="text-lg font-bold mb-4">Add Password</h3>
-        <form onSubmit={handleSubmit} className="space-y-3">
+    <div className="modal-backdrop" onClick={onClose}>
+      <section className="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="add-password-title" onClick={(event) => event.stopPropagation()}>
+        <div className="sheet-grabber" />
+        <header className="modal-heading">
+          <span className="modal-heading-icon"><KeyRound /></span>
           <div>
-            <label className="text-xs text-slate-400 mb-1 block">Account / Website Name</label>
-            <select
-              value={selectedPreset}
-              onChange={(e) => setSelectedPreset(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-indigo-500 mb-2"
-            >
-              {availableOptions.map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-              <option value="Custom...">อื่น ๆ (ระบุเอง)...</option>
-            </select>
+            <p>NEW ENTRY</p>
+            <h2 id="add-password-title">Add an account</h2>
+          </div>
+          <button type="button" className="row-icon-button modal-close" onClick={onClose} aria-label="Close">
+            <X />
+          </button>
+        </header>
+        <p className="modal-description">Keep a sign-in safely in your wallet.</p>
 
+        <form onSubmit={handleSubmit} className="modal-form">
+          <div className="form-field">
+            <label htmlFor="account-preset">Account name</label>
+            <select id="account-preset" value={selectedPreset} onChange={(event) => setSelectedPreset(event.target.value)} className="form-control">
+              {availableOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+              <option value="Custom...">Other</option>
+            </select>
             {selectedPreset === 'Custom...' && (
               <input
                 type="text"
-                placeholder="ระบุชื่อเว็บไซต์หรือแอป..."
+                placeholder="Website or app name"
                 value={customTitle}
-                onChange={(e) => setCustomTitle(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+                onChange={(event) => setCustomTitle(event.target.value)}
+                className="form-control custom-title-input"
+                autoFocus
               />
             )}
           </div>
 
-          <div>
-            <label className="text-xs text-slate-400 mb-1 block">Username / Email</label>
-            <input
-              type="text"
-              placeholder="user@example.com"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
-            />
+          <div className="form-field">
+            <label htmlFor="account-username">Username or email</label>
+            <input id="account-username" type="text" placeholder="you@example.com" value={username} onChange={(event) => setUsername(event.target.value)} className="form-control" autoComplete="username" />
           </div>
 
-          <div>
-            <label className="text-xs text-slate-400 mb-1 block">Password</label>
-            <input
-              type="password"
-              placeholder="Secret password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
-            />
+          <div className="form-field">
+            <label htmlFor="account-password">Password</label>
+            <input id="account-password" type="password" placeholder="Enter password" value={password} onChange={(event) => setPassword(event.target.value)} className="form-control" autoComplete="new-password" />
           </div>
 
-          <div>
-            <label className="text-xs text-slate-400 mb-1 block">Note (หมายเหตุเพิ่มเติม)</label>
-            <input
-              type="text"
-              placeholder="เช่น PIN สำรอง, คำถามกันลืม"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-indigo-500"
-            />
+          <div className="form-field">
+            <label htmlFor="account-note">Note <span>Optional</span></label>
+            <input id="account-note" type="text" placeholder="A private reminder" value={note} onChange={(event) => setNote(event.target.value)} className="form-control" />
           </div>
 
-          <div className="flex gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-xl transition cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-xs font-medium rounded-xl transition cursor-pointer"
-            >
-              Save & Encrypt
-            </button>
+          <div className="modal-actions">
+            <button type="button" onClick={onClose} className="button-secondary">Cancel</button>
+            <button type="submit" className="button-primary">Save to wallet</button>
           </div>
         </form>
-      </div>
+      </section>
     </div>
   );
 };

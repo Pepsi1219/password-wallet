@@ -1,1 +1,53 @@
 @import "tailwindcss";
+
+:root {
+	font-family: "DM Sans", "Avenir Next", sans-serif;
+	color: #17241e;
+	background: #edf2ed;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	font-optical-sizing: auto;
+	font-weight: 400;
+
+	--ink: #17241e;
+	--muted: #748078;
+	--line: #e5e9e3;
+	--paper: #fbfcf8;
+	--forest: #155c45;
+	--forest-dark: #104633;
+	--mint: #d7eee2;
+	--coral: #e57d5f;
+	--sky: #dceaf2;
+	--shadow: 0 24px 70px rgba(31, 51, 41, 0.14);
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+	width: 100%;
+	min-width: 320px;
+	min-height: 100%;
+	margin: 0;
+}
+
+body {
+	min-height: 100vh;
+	min-height: 100dvh;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+}
+
+button {
+	-webkit-tap-highlight-color: transparent;
+}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ShieldCheck, Unlock, LogOut } from 'lucide-react';
 import { encryptData, decryptData } from './services/crypto';
 import { db, auth, googleProvider } from './services/firebase';
-import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, serverTimestamp, query, where, limit } from 'firebase/firestore';
+import { collection, addDoc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, where, limit } from 'firebase/firestore';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 
@@ -41,7 +41,7 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // ตรวจสอบว่าผู้ใช้คนนี้เคยบันทึกข้อมูล (หมายถึงเคยตั้ง PIN แล้ว) ใน Firestore หรือยัง
+  // PIN verifier and existing wallet records are both stored in this user's vault.
   const checkUserPinStatus = async (uid: string) => {
     try {
       const q = query(collection(db, 'vault_items'), where('userId', '==', uid), limit(1));
@@ -50,7 +50,7 @@ export default function App() {
       setHasPinConfigured(!querySnapshot.empty);
     } catch (error) {
       console.error('Error checking PIN status:', error);
-      setHasPinConfigured(false);
+      setHasPinConfigured(true);
     }
   };
 
@@ -75,18 +75,73 @@ export default function App() {
     }
   };
 
-  // เมื่อผู้ใช้ใหม่สร้าง PIN สำเร็จ (สร้างรายการจำลองชั่วคราวเพื่อบันทึก Salt/Key ล็อกระบบ หรือพร้อมใช้งาน)
-  const handlePinCreated = async (pin: string) => {
-    setMasterPassword(pin);
-    setHasPinConfigured(true);
-    setIsUnlocked(true);
-    if (user) fetchWallet(user.uid);
+  const handlePinCreated = async (pin: string): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      const verifier = await encryptData(`password-wallet-pin:v1:${user.uid}`, pin);
+      await setDoc(doc(db, 'vault_items', `pin-verifier_${user.uid}`), {
+        userId: user.uid,
+        recordType: 'pin-verifier',
+        ...verifier,
+        createdAt: serverTimestamp(),
+      });
+
+      setMasterPassword(pin);
+      setHasPinConfigured(true);
+      setIsUnlocked(true);
+      fetchWallet(user.uid);
+      return true;
+    } catch (error) {
+      console.error('Error saving PIN verifier:', error);
+      return false;
+    }
   };
 
-  const handleUnlock = (pin: string) => {
-    setMasterPassword(pin);
-    setIsUnlocked(true);
-    if (user) fetchWallet(user.uid);
+  const handleUnlock = async (pin: string): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      const verifierRef = doc(db, 'vault_items', `pin-verifier_${user.uid}`);
+      const verifierSnapshot = await getDoc(verifierRef);
+      const verifierText = `password-wallet-pin:v1:${user.uid}`;
+
+      if (verifierSnapshot.exists()) {
+        const verifier = verifierSnapshot.data();
+        const decryptedVerifier = await decryptData(
+          { ciphertext: verifier.ciphertext, salt: verifier.salt, iv: verifier.iv },
+          pin
+        );
+        if (decryptedVerifier !== verifierText) return false;
+      } else {
+        const q = query(collection(db, 'vault_items'), where('userId', '==', user.uid), limit(1));
+        const querySnapshot = await getDocs(q);
+        const legacyItem = querySnapshot.docs.find((item) => item.data().recordType !== 'pin-verifier');
+        if (!legacyItem) return false;
+
+        const data = legacyItem.data();
+        await decryptData(
+          { ciphertext: data.ciphertext, salt: data.salt, iv: data.iv },
+          pin
+        );
+
+        const verifier = await encryptData(verifierText, pin);
+        await setDoc(verifierRef, {
+          userId: user.uid,
+          recordType: 'pin-verifier',
+          ...verifier,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      setMasterPassword(pin);
+      setIsUnlocked(true);
+      fetchWallet(user.uid);
+      return true;
+    } catch (error) {
+      console.error('Error validating Master PIN:', error);
+      return false;
+    }
   };
 
   const fetchWallet = async (uid: string) => {
@@ -97,6 +152,7 @@ export default function App() {
       const items: WalletItem[] = [];
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data();
+        if (data.recordType === 'pin-verifier') return;
         items.push({
           id: docSnap.id,
           title: data.title,
@@ -202,82 +258,81 @@ export default function App() {
 
   if (authLoading || (user && hasPinConfigured === null)) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
-        <p className="text-sm text-slate-400">Loading Personal Password Wallet...</p>
+      <div className="app-backdrop">
+        <div className="loading-state">
+          <span className="brand-emblem"><ShieldCheck /></span>
+          <p>Opening your wallet...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-      {/* Container มือถือ iOS Style */}
-      <div className="w-full max-w-md h-[844px] bg-slate-900 border border-slate-800 rounded-[40px] shadow-2xl flex flex-col overflow-hidden relative">
-        
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/80 backdrop-blur-md">
-          <div className="flex items-center space-x-2">
-            <ShieldCheck className="w-6 h-6 text-emerald-400" />
-            <span className="font-bold text-base tracking-tight">Password Wallet</span>
+    <div className="app-backdrop">
+      <div className="app-shell">
+        <header className="app-header">
+          <div className="brand-lockup">
+            <span className="brand-emblem"><ShieldCheck /></span>
+            <span className="brand-copy">
+              <strong>Wallet</strong>
+              <small>PERSONAL VAULT</small>
+            </span>
           </div>
-          
+
           {user && (
-            <div className="flex items-center gap-2">
+            <div className="session-controls">
               {isUnlocked && (
-                <span className="text-[10px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-full font-medium flex items-center gap-1">
-                  <Unlock className="w-3 h-3" /> Unlocked
+                <span className="session-badge">
+                  <Unlock /> <span>Unlocked</span>
                 </span>
               )}
               <button
                 onClick={handleLogout}
+                aria-label="Sign out"
                 title="Sign out"
-                className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 hover:text-red-400 transition cursor-pointer"
+                className="icon-button signout-button"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut />
               </button>
             </div>
           )}
-        </div>
+        </header>
 
-        {/* Dynamic Screens Flow */}
-        {!user ? (
-          <LoginScreen onGoogleLogin={handleGoogleLogin} />
-        ) : !hasPinConfigured ? (
-          /* กรณีผู้ใช้ใหม่ยังไม่เคยตั้ง PIN ให้บังคับสร้างก่อน */
-          <SetupPinScreen user={user} onPinCreated={handlePinCreated} />
-        ) : !isUnlocked ? (
-          /* กรณีเคยตั้งแล้ว แต่ยังไม่ปลดล็อก แสดงหน้าใส่ PIN ปกติ */
-          <UnlockScreen user={user} onUnlock={handleUnlock} />
-        ) : (
-          /* ปลดล็อกสำเร็จแสดง Dashboard */
-          <Dashboard
-            user={user}
-            items={walletItems}
-            loading={loading}
-            onOpenAddModal={() => setShowAddModal(true)}
-            onOpenEditModal={(item) => setEditingItem(item)} // <-- เติมบรรทัดนี้เพิ่มเข้าไปครับ
-            onDelete={handleDelete}
-            onDecryptItem={handleDecryptItem}
-          />
-        )}
+        <main className="app-content">
+          {!user ? (
+            <LoginScreen onGoogleLogin={handleGoogleLogin} />
+          ) : !hasPinConfigured ? (
+            <SetupPinScreen user={user} onPinCreated={handlePinCreated} />
+          ) : !isUnlocked ? (
+            <UnlockScreen user={user} onUnlock={handleUnlock} />
+          ) : (
+            <Dashboard
+              user={user}
+              items={walletItems}
+              loading={loading}
+              onOpenAddModal={() => setShowAddModal(true)}
+              onOpenEditModal={(item) => setEditingItem(item)}
+              onDelete={handleDelete}
+              onDecryptItem={handleDecryptItem}
+            />
+          )}
 
-        {/* Modal เพิ่มรหัสผ่าน */}
-        {showAddModal && user && (
-          <AddPasswordModal
-            userId={user.uid}
-            onClose={() => setShowAddModal(false)}
-            onAdd={handleAddPassword}
-          />
-        )}
+          {showAddModal && user && (
+            <AddPasswordModal
+              userId={user.uid}
+              onClose={() => setShowAddModal(false)}
+              onAdd={handleAddPassword}
+            />
+          )}
 
-        {/* Modal แก้ไขรหัสผ่าน */}
-        {editingItem && (
-          <EditPasswordModal
-            item={editingItem}
-            onClose={() => setEditingItem(null)}
-            onUpdate={handleUpdatePassword}
-          />
-        )}
-
+          {editingItem && (
+            <EditPasswordModal
+              item={editingItem}
+              onClose={() => setEditingItem(null)}
+              onUpdate={handleUpdatePassword}
+            />
+          )}
+        </main>
       </div>
     </div>
   );
