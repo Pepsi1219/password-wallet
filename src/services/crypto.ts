@@ -26,7 +26,7 @@ function base64ToBuffer(base64: string): ArrayBuffer {
 /**
  * สร้าง Cryptographic Key จาก Master Password และ Salt โดยใช้ PBKDF2
  */
-async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
+async function deriveKey(password: string, salt: Uint8Array<ArrayBuffer>): Promise<CryptoKey> {
   const enc = new TextEncoder();
   const keyMaterial = await window.crypto.subtle.importKey(
     "raw",
@@ -73,8 +73,8 @@ export async function encryptData(plainText: string, masterPassword: string) {
 
     return {
       ciphertext: bufferToBase64(encryptedContent),
-      salt: bufferToBase64(salt),
-      iv: bufferToBase64(iv),
+      salt: bufferToBase64(salt.buffer),
+      iv: bufferToBase64(iv.buffer),
     };
   } catch (error) {
     console.error("Encryption failed:", error);
