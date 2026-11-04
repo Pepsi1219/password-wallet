@@ -619,6 +619,40 @@
   line-height: 1.6;
 }
 
+.recovery-key-value {
+  display: flex;
+  width: min(100%, 420px);
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 26px 0 8px;
+  padding: 10px 12px 10px 16px;
+  border: 1px solid #dce5dc;
+  border-radius: 12px;
+  background: #f4f7f3;
+  text-align: left;
+}
+
+.recovery-key-value code {
+  overflow-wrap: anywhere;
+  color: #17241e;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.recovery-key-value + .pin-description {
+  max-width: 380px;
+  margin-bottom: 20px;
+}
+
+.recovery-continue-button {
+  width: min(100%, 240px);
+  flex: 0 0 auto;
+  margin-top: 6px;
+}
+
 .pin-warning {
   display: flex;
   max-width: 340px;
@@ -822,6 +856,98 @@
 .add-entry-button svg {
   width: 21px;
   height: 21px;
+}
+
+.category-detail-heading {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.category-back-button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.category-back-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.category-card {
+  display: flex;
+  min-width: 0;
+  min-height: 78px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e8ece6;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+.category-card:hover {
+  transform: translateY(-1px);
+  border-color: #cbd9ce;
+  background: #fbfdf9;
+}
+
+.category-card > .service-mark {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.category-card-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 4px;
+}
+
+.category-card-copy strong,
+.category-card-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-card-copy strong {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.category-card-copy small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.category-card > svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: #89968c;
 }
 
 .vault-summary {
@@ -1480,6 +1606,26 @@
 
 .app-backdrop[data-theme="dark"] .vault-summary {
   background: #174b39;
+}
+
+.app-backdrop[data-theme="dark"] .category-back-button {
+  border-color: #354239;
+  background: #202a23;
+  color: #dce5dc;
+}
+
+.app-backdrop[data-theme="dark"] .category-card {
+  border-color: #2d3931;
+  background: #1b241e;
+}
+
+.app-backdrop[data-theme="dark"] .category-card:hover {
+  border-color: #435849;
+  background: #202c24;
+}
+
+.app-backdrop[data-theme="dark"] .category-card > svg {
+  color: #9baa9d;
 }
 
 .app-backdrop[data-theme="dark"] .wallet-search {

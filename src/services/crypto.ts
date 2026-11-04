@@ -109,3 +109,70 @@ export async function decryptData(
     throw new Error("รหัสผ่านหลัก (Master Password) ไม่ถูกต้อง หรือข้อมูลเสียหาย");
   }
 }
+
+export type WrappedKey = { ciphertext: string; salt: string; iv: string };
+
+export async function createVaultKey(): Promise<CryptoKey> {
+  return window.crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"]
+  );
+}
+
+export function createRecoveryKey(): string {
+  const bytes = window.crypto.getRandomValues(new Uint8Array(24));
+  const value = bufferToBase64(bytes.buffer)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+  return value.match(/.{1,4}/g)?.join("-") ?? value;
+}
+
+export async function wrapVaultKey(vaultKey: CryptoKey, secret: string): Promise<WrappedKey> {
+  const rawKey = await window.crypto.subtle.exportKey("raw", vaultKey);
+  return encryptData(bufferToBase64(rawKey), secret);
+}
+
+export async function unwrapVaultKey(payload: WrappedKey, secret: string): Promise<CryptoKey> {
+  const encodedKey = await decryptData(payload, secret);
+  const rawKey = base64ToBuffer(encodedKey);
+  return window.crypto.subtle.importKey(
+    "raw",
+    rawKey,
+    { name: "AES-GCM" },
+    false,
+    ["encrypt", "decrypt"]
+  );
+}
+
+export async function encryptWithVaultKey(plainText: string, vaultKey: CryptoKey) {
+  const iv = window.crypto.getRandomValues(new Uint8Array(12));
+  const ciphertext = await window.crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    vaultKey,
+    new TextEncoder().encode(plainText)
+  );
+
+  return {
+    ciphertext: bufferToBase64(ciphertext),
+    iv: bufferToBase64(iv.buffer),
+    cryptoVersion: "vault-key-v1",
+  };
+}
+
+export async function decryptWithVaultKey(
+  payload: { ciphertext: string; iv: string },
+  vaultKey: CryptoKey
+): Promise<string> {
+  const plaintext = await window.crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: new Uint8Array(base64ToBuffer(payload.iv)) },
+    vaultKey,
+    base64ToBuffer(payload.ciphertext)
+  );
+  return new TextDecoder().decode(plaintext);
+}
+
+export function normalizeRecoveryKey(recoveryKey: string): string {
+  return recoveryKey.replace(/[\s-]/g, "");
+}

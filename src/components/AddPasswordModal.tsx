@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { db } from '../services/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import React, { useState } from 'react';
 import { KeyRound, X } from 'lucide-react';
 import { t } from '../i18n';
 import type { Language } from '../i18n';
 
 interface AddPasswordModalProps {
-  userId: string; // รับ userId มาเพื่อดึงรายการที่เคยบันทึกไว้ของผู้ใช้คนนี้
+  categories: string[];
   language: Language;
   onClose: () => void;
   onAdd: (title: string, username: string, pass: string, note: string) => void;
@@ -14,37 +12,14 @@ interface AddPasswordModalProps {
 
 const DEFAULT_PRESETS = ['Google', 'GitHub', 'Microsoft'];
 
-export const AddPasswordModal: React.FC<AddPasswordModalProps> = ({ userId, language, onClose, onAdd }) => {
+export const AddPasswordModal: React.FC<AddPasswordModalProps> = ({ categories, language, onClose, onAdd }) => {
   const [selectedPreset, setSelectedPreset] = useState('Google');
   const [customTitle, setCustomTitle] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [note, setNote] = useState('');
   
-  // รายการตัวเลือกทั้งหมด (Preset + ของที่เคยบันทึกไว้)
-  const [availableOptions, setAvailableOptions] = useState<string[]>(DEFAULT_PRESETS);
-
-  // ดึงรายการ Website Name ที่ผู้ใช้เคยบันทึกไว้ใน Firestore มาผูกเป็นตัวเลือกเพิ่มเติม
-  useEffect(() => {
-    const fetchUserHistory = async () => {
-      try {
-        const q = query(collection(db, 'vault_items'), where('userId', '==', userId));
-        const snapshot = await getDocs(q);
-        const savedTitles = new Set<string>(DEFAULT_PRESETS);
-        
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.title) savedTitles.add(data.title);
-        });
-
-        setAvailableOptions(Array.from(savedTitles));
-      } catch (error) {
-        console.error('Error fetching history:', error);
-      }
-    };
-
-    if (userId) fetchUserHistory();
-  }, [userId]);
+  const availableOptions = Array.from(new Set([...DEFAULT_PRESETS, ...categories]));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

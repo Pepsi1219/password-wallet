@@ -8,12 +8,18 @@ interface UnlockScreenProps {
   user: User;
   language: Language;
   onUnlock: (password: string) => Promise<boolean>;
+  onRecover: (recoveryKey: string, newPin: string) => Promise<boolean>;
 }
 
-export const UnlockScreen: React.FC<UnlockScreenProps> = ({ user, language, onUnlock }) => {
+export const UnlockScreen: React.FC<UnlockScreenProps> = ({ user, language, onUnlock, onRecover }) => {
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState('');
   const [isChecking, setIsChecking] = useState(false);
+  const [isRecovering, setIsRecovering] = useState(false);
+  const [recoveryKey, setRecoveryKey] = useState('');
+  const [newPin, setNewPin] = useState('');
+  const [confirmNewPin, setConfirmNewPin] = useState('');
+  const [recoveryError, setRecoveryError] = useState('');
   const PIN_LENGTH = 6; // กำหนดความยาว PIN เช่น 6 หลัก
 
   // กดปุ่มตัวเลข
@@ -42,6 +48,53 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({ user, language, onUn
     setPinError('');
   };
 
+  const handleRecoverySubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (newPin.length !== PIN_LENGTH || newPin !== confirmNewPin) {
+      setRecoveryError(t(language, newPin !== confirmNewPin ? 'pinMismatch' : 'pinLengthRequired'));
+      return;
+    }
+
+    setIsChecking(true);
+    setRecoveryError('');
+    const recovered = await onRecover(recoveryKey, newPin);
+    setIsChecking(false);
+    if (!recovered) setRecoveryError(t(language, 'recoveryFailed'));
+  };
+
+  if (isRecovering) {
+    return (
+      <div className="pin-screen">
+        <section className="pin-heading">
+          <div className="pin-icon"><KeyRound /></div>
+          <p className="pin-step">{t(language, 'recoveryTitle')}</p>
+          <h1>{t(language, 'recoveryTitle')}</h1>
+          <p className="pin-account">{user.displayName || user.email}</p>
+          <p className="pin-description">{t(language, 'recoveryDescription')}</p>
+        </section>
+        <form className="modal-form" onSubmit={handleRecoverySubmit}>
+          <div className="form-field">
+            <label htmlFor="recovery-key">{t(language, 'recoveryKeyLabel')}</label>
+            <input id="recovery-key" className="form-control" value={recoveryKey} onChange={(event) => setRecoveryKey(event.target.value)} autoComplete="off" required />
+          </div>
+          <div className="form-field">
+            <label htmlFor="recovery-new-pin">{t(language, 'newPinLabel')}</label>
+            <input id="recovery-new-pin" type="password" className="form-control" value={newPin} onChange={(event) => setNewPin(event.target.value.replace(/\D/g, '').slice(0, PIN_LENGTH))} inputMode="numeric" autoComplete="new-password" required />
+          </div>
+          <div className="form-field">
+            <label htmlFor="recovery-confirm-pin">{t(language, 'confirmNewPinLabel')}</label>
+            <input id="recovery-confirm-pin" type="password" className="form-control" value={confirmNewPin} onChange={(event) => setConfirmNewPin(event.target.value.replace(/\D/g, '').slice(0, PIN_LENGTH))} inputMode="numeric" autoComplete="new-password" required />
+          </div>
+          {recoveryError && <p role="alert" className="pin-error">{recoveryError}</p>}
+          <div className="modal-actions">
+            <button type="button" className="button-secondary" onClick={() => setIsRecovering(false)} disabled={isChecking}>{t(language, 'backToPin')}</button>
+            <button type="submit" className="button-primary" disabled={isChecking}>{t(language, 'recoverVault')}</button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="pin-screen">
       <section className="pin-heading">
@@ -51,6 +104,9 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({ user, language, onUn
         <p className="pin-account">{user.displayName || user.email}</p>
         <p className="pin-description">{t(language, 'unlockPrompt')}</p>
       </section>
+      <button type="button" className="text-action-button" onClick={() => setIsRecovering(true)}>
+        {t(language, 'forgotPin')}
+      </button>
 
       <div className="pin-indicators" aria-label={t(language, 'digitsEntered', { count: pin.length })}>
         {Array.from({ length: PIN_LENGTH }).map((_, index) => (
