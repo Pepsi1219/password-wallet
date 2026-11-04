@@ -67,7 +67,8 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.lang = language;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#111914' : '#155c45');
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0e1410' : '#155c45');
     try {
       localStorage.setItem('wallet-language', language);
       localStorage.setItem('wallet-theme', theme);

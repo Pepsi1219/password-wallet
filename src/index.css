@@ -27,6 +27,11 @@
 	box-sizing: border-box;
 }
 
+:root[data-theme="dark"] {
+	color-scheme: dark;
+	background-color: #0e1410;
+}
+
 html,
 body,
 #root {
