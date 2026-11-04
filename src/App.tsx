@@ -69,6 +69,7 @@ export default function App() {
     document.documentElement.lang = language;
     document.documentElement.dataset.theme = theme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0e1410' : '#155c45');
+    document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.setAttribute('content', theme === 'dark' ? 'black' : 'default');
     try {
       localStorage.setItem('wallet-language', language);
       localStorage.setItem('wallet-theme', theme);

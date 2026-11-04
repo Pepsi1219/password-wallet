@@ -24,14 +24,17 @@
 }
 
 .app-header {
+  position: sticky;
+  top: 0;
   z-index: 2;
   display: flex;
+  flex: 0 0 auto;
   min-height: 76px;
   align-items: center;
   justify-content: space-between;
   padding: 14px 22px;
   border-bottom: 1px solid var(--line);
-  background: rgba(251, 252, 248, 0.94);
+  background: var(--paper);
 }
 
 .brand-lockup,
@@ -1506,7 +1509,7 @@
 
 .app-backdrop[data-theme="dark"] .app-header {
   border-color: var(--line);
-  background: rgba(22, 29, 24, 0.95);
+  background: var(--paper);
 }
 
 .app-backdrop[data-theme="dark"] .brand-copy small,
